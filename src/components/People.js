@@ -11,7 +11,10 @@ const People = () => {
   // The first argument is the name of the query, the second is the function that will fetch the data.
   // The third argument is an object that contains options for the query.
   // The query will be automatically re-run when the component is re-rendered.
-  const { data, status } = useQuery("people", fetchPeople);
+  const { data, status } = useQuery("people", fetchPeople, {
+    onSuccess: () => console.log("People fetched successfully"),
+    onError: () => console.log("Error fetching people"),
+  });
 
   return (
     <div>

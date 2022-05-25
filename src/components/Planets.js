@@ -9,9 +9,12 @@ const fetchPlanets = async () => {
 const Planets = () => {
   // The useQuery hook is used to fetch data from the API.
   // The first argument is the name of the query, the second is the function that will fetch the data.
-  // The third argument is an object that contains options for the query.
+  // The third argument is an object that contains configurations for the query.
   // The query will be automatically re-run when the component is re-rendered.
-  const { data, status } = useQuery("planets", fetchPlanets);
+  const { data, status } = useQuery("planets", fetchPlanets, {
+    onSuccess: () => console.log("Planets fetched successfully"),
+    onError: () => console.log("Error fetching planets"),
+  });
 
   return (
     <div>
