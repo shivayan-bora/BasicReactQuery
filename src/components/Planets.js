@@ -2,11 +2,7 @@ import { useState } from "react";
 import { useQuery } from "react-query";
 import Planet from "./Planet";
 
-const fetchPlanets = async ({ queryKey }) => {
-  const [key, greetings, page] = queryKey;
-  console.log(key);
-  console.log(greetings);
-  console.log(page);
+const fetchPlanets = async (page = 1) => {
   const res = await fetch(`https://swapi.dev/api/planets/?page=${page}`);
   return res.json();
 };
@@ -17,29 +13,46 @@ const Planets = () => {
   // The first argument is the name of the query, the second is the function that will fetch the data.
   // The third argument is an object that contains configurations for the query.
   // The query will be automatically re-run when the component is re-rendered.
-  const { data, status } = useQuery(
-    ["planets", "hello, ninjas", page],
-    fetchPlanets,
+  const { data, status, isPreviousData } = useQuery(
+    ["planets", page],
+    () => fetchPlanets(page),
     {
       onSuccess: () => console.log("Planets fetched successfully"),
       onError: () => console.log("Error fetching planets"),
+      keepPreviousData: true,
     }
   );
 
   return (
     <div>
       <h2>Planets</h2>
-      <button onClick={() => setPage(1)}>Page 1</button>
-      <button onClick={() => setPage(2)}>Page 2</button>
-      <button onClick={() => setPage(3)}>Page 3</button>
       {status === "error" && <div>Error fetching data!</div>}
       {status === "loading" && <div>Loading data...</div>}
       {status === "success" && (
-        <div>
-          {data?.results?.map((planet, index) => (
-            <Planet planet={planet} key={index} />
-          ))}
-        </div>
+        <>
+          <button
+            onClick={() => setPage((old) => Math.max(old - 1, 1))}
+            disabled={page === 1}
+          >
+            Previous Page
+          </button>
+          <span>{page}</span>
+          <button
+            onClick={() => {
+              if (!isPreviousData && data.next) {
+                setPage((old) => old + 1);
+              }
+            }}
+            disabled={isPreviousData || !data?.next}
+          >
+            Next Page
+          </button>
+          <div>
+            {data?.results?.map((planet, index) => (
+              <Planet planet={planet} key={index} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
